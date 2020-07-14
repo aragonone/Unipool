@@ -4,13 +4,14 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "./IRewardDistributionRecipient.sol";
+import "@aragon/court/contracts/standards/ApproveAndCall.sol";
+
 
 contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public uni = IERC20(0xe9Cf7887b93150D4F2Da7dFc6D502B216438F244);
+    IERC20 public UNI = IERC20(0xfa19de406e8F5b9100E4dD5CaD8a503a6d686Efe);
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -26,22 +27,23 @@ contract LPTokenWrapper {
     function stake(uint256 amount) public {
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
-        uni.safeTransferFrom(msg.sender, address(this), amount);
+        UNI.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function withdraw(uint256 amount) public {
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        uni.safeTransfer(msg.sender, amount);
+        UNI.safeTransfer(msg.sender, amount);
     }
 }
 
-contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
-    IERC20 public snx = IERC20(0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F);
-    uint256 public constant DURATION = 7 days;
 
-    uint256 public periodFinish = 0;
-    uint256 public rewardRate = 0;
+contract Unipool is LPTokenWrapper, ApproveAndCallFallBack {
+    IERC20 public ANT = IERC20(0x960b236A07cf122663c4303350609A66A7B288C0);
+    uint256 public constant DURATION = 30 days;
+
+    uint256 public periodFinish;
+    uint256 public rewardRate;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
     mapping(address => uint256) public userRewardPerTokenPaid;
@@ -110,25 +112,37 @@ contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            snx.safeTransfer(msg.sender, reward);
+            ANT.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
 
-    function notifyRewardAmount(uint256 reward)
-        external
-        onlyRewardDistribution
-        updateReward(address(0))
-    {
+    /**
+     * @dev This function must be triggered by the contribution token approve-and-call fallback.
+     *      It will update reward rate and time.
+     * @param _from Address of the original caller approving the tokens
+     * @param _amount Amount of reward tokens added to the pool
+     * @param _token Address of the token triggering the approve-and-call fallback
+     */
+    function receiveApproval(address _from, uint256 _amount, address _token, bytes calldata) external updateReward(address(0)) {
+        require(_amount > 0, "Cannot approve 0");
+        require(
+            _token == msg.sender && _token == address(ANT),
+            "Wrong token"
+        );
+
         if (block.timestamp >= periodFinish) {
-            rewardRate = reward.div(DURATION);
+            rewardRate = _amount.div(DURATION);
         } else {
             uint256 remaining = periodFinish.sub(block.timestamp);
             uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = reward.add(leftover).div(DURATION);
+            rewardRate = _amount.add(leftover).div(DURATION);
         }
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(DURATION);
-        emit RewardAdded(reward);
+
+        ANT.safeTransferFrom(_from, address(this), _amount);
+
+        emit RewardAdded(_amount);
     }
 }

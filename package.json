@@ -4,10 +4,11 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git@github.com:k06a/Unipool.git"
+    "url": "git@github.com:aragonone/Unipool.git"
   },
   "license": "MIT",
   "dependencies": {
+    "@aragon/court": "1.1.0",
     "@openzeppelin/contracts": "^2.4.0"
   },
   "devDependencies": {
