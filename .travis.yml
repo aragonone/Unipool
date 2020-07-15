@@ -14,6 +14,3 @@ script:
   - yarn run test
 after_script:
   - yarn run coverage
-branches:
-  only:
-  - master

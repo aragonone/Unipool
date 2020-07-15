@@ -190,114 +190,6 @@ library SafeMath {
     }
 }
 
-// File: @openzeppelin/contracts/GSN/Context.sol
-
-pragma solidity ^0.5.0;
-
-/*
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with GSN meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-contract Context {
-    // Empty internal constructor, to prevent people from mistakenly deploying
-    // an instance of this contract, which should be used via inheritance.
-    constructor () internal { }
-    // solhint-disable-previous-line no-empty-blocks
-
-    function _msgSender() internal view returns (address payable) {
-        return msg.sender;
-    }
-
-    function _msgData() internal view returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
-    }
-}
-
-// File: @openzeppelin/contracts/ownership/Ownable.sol
-
-pragma solidity ^0.5.0;
-
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
-contract Ownable is Context {
-    address private _owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor () internal {
-        _owner = _msgSender();
-        emit OwnershipTransferred(address(0), _owner);
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(isOwner(), "Ownable: caller is not the owner");
-        _;
-    }
-
-    /**
-     * @dev Returns true if the caller is the current owner.
-     */
-    function isOwner() public view returns (bool) {
-        return _msgSender() == _owner;
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public onlyOwner {
-        _transferOwnership(newOwner);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     */
-    function _transferOwnership(address newOwner) internal {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
-}
-
 // File: @openzeppelin/contracts/token/ERC20/IERC20.sol
 
 pragma solidity ^0.5.0;
@@ -388,19 +280,21 @@ library Address {
     /**
      * @dev Returns true if `account` is a contract.
      *
-     * This test is non-exhaustive, and there may be false-negatives: during the
-     * execution of a contract's constructor, its address will be reported as
-     * not containing a contract.
+     * [IMPORTANT]
+     * ====
+     * It is unsafe to assume that an address for which this function returns
+     * false is an externally-owned account (EOA) and not a contract.
      *
-     * IMPORTANT: It is unsafe to assume that an address for which this
-     * function returns false is an externally-owned account (EOA) and not a
-     * contract.
+     * Among others, `isContract` will return false for the following 
+     * types of addresses:
+     *
+     *  - an externally-owned account
+     *  - a contract in construction
+     *  - an address where a contract will be created
+     *  - an address where a contract lived, but was destroyed
+     * ====
      */
     function isContract(address account) internal view returns (bool) {
-        // This method relies in extcodesize, which returns 0 for contracts in
-        // construction, since the code is only stored at the end of the
-        // constructor execution.
-
         // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
         // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
         // for accounts without code, i.e. `keccak256('')`
@@ -408,7 +302,7 @@ library Address {
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
         assembly { codehash := extcodehash(account) }
-        return (codehash != 0x0 && codehash != accountHash);
+        return (codehash != accountHash && codehash != 0x0);
     }
 
     /**
@@ -525,28 +419,20 @@ library SafeERC20 {
     }
 }
 
-// File: contracts/IRewardDistributionRecipient.sol
+// File: @aragon/court/contracts/standards/ApproveAndCall.sol
 
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.8;
 
 
-
-contract IRewardDistributionRecipient is Ownable {
-    address rewardDistribution;
-
-    function notifyRewardAmount(uint256 reward) external;
-
-    modifier onlyRewardDistribution() {
-        require(_msgSender() == rewardDistribution, "Caller is not reward distribution");
-        _;
-    }
-
-    function setRewardDistribution(address _rewardDistribution)
-        external
-        onlyOwner
-    {
-        rewardDistribution = _rewardDistribution;
-    }
+interface ApproveAndCallFallBack {
+    /**
+    * @dev This allows users to use their tokens to interact with contracts in one function call instead of two
+    * @param _from Address of the account transferring the tokens
+    * @param _amount The amount of tokens approved for in the transfer
+    * @param _token Address of the token contract calling this function
+    * @param _data Optional data that can be used to add signalling information in more complex staking applications
+    */
+    function receiveApproval(address _from, uint256 _amount, address _token, bytes calldata _data) external;
 }
 
 // File: contracts/Unipool.sol
@@ -562,7 +448,8 @@ contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public uni = IERC20(0xe9Cf7887b93150D4F2Da7dFc6D502B216438F244);
+    // Uniswap v2 ANT/ETH pair token
+    IERC20 public UNI = IERC20(0xfa19de406e8F5b9100E4dD5CaD8a503a6d686Efe);
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -578,22 +465,24 @@ contract LPTokenWrapper {
     function stake(uint256 amount) public {
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
-        uni.safeTransferFrom(msg.sender, address(this), amount);
+        UNI.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function withdraw(uint256 amount) public {
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        uni.safeTransfer(msg.sender, amount);
+        UNI.safeTransfer(msg.sender, amount);
     }
 }
 
-contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
-    IERC20 public snx = IERC20(0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F);
-    uint256 public constant DURATION = 7 days;
 
-    uint256 public periodFinish = 0;
-    uint256 public rewardRate = 0;
+contract Unipool is LPTokenWrapper, ApproveAndCallFallBack {
+    uint256 public constant DURATION = 30 days;
+    // Aragon Network Token
+    IERC20 public ANT = IERC20(0x960b236A07cf122663c4303350609A66A7B288C0);
+
+    uint256 public periodFinish;
+    uint256 public rewardRate;
     uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
     mapping(address => uint256) public userRewardPerTokenPaid;
@@ -662,25 +551,37 @@ contract Unipool is LPTokenWrapper, IRewardDistributionRecipient {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            snx.safeTransfer(msg.sender, reward);
+            ANT.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
 
-    function notifyRewardAmount(uint256 reward)
-        external
-        onlyRewardDistribution
-        updateReward(address(0))
-    {
+    /**
+     * @dev This function must be triggered by the contribution token approve-and-call fallback.
+     *      It will update reward rate and time.
+     * @param _from Address of the original caller approving the tokens
+     * @param _amount Amount of reward tokens added to the pool
+     * @param _token Address of the token triggering the approve-and-call fallback
+     */
+    function receiveApproval(address _from, uint256 _amount, address _token, bytes calldata) external updateReward(address(0)) {
+        require(_amount > 0, "Cannot approve 0");
+        require(
+            _token == msg.sender && _token == address(ANT),
+            "Wrong token"
+        );
+
         if (block.timestamp >= periodFinish) {
-            rewardRate = reward.div(DURATION);
+            rewardRate = _amount.div(DURATION);
         } else {
             uint256 remaining = periodFinish.sub(block.timestamp);
             uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = reward.add(leftover).div(DURATION);
+            rewardRate = _amount.add(leftover).div(DURATION);
         }
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(DURATION);
-        emit RewardAdded(reward);
+
+        ANT.safeTransferFrom(_from, address(this), _amount);
+
+        emit RewardAdded(_amount);
     }
 }

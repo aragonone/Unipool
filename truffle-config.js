@@ -37,5 +37,6 @@ module.exports = {
       showTimeSpent: true,
       excludeContracts: ['Migrations']
     }
-  }
+  },
+  plugins: ["solidity-coverage"]
 };
