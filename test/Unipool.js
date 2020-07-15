@@ -123,7 +123,7 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             // 3x:         +--------+ =  0k for 30d + 54k for 60d
             //
 
-            // 72000 ANT per week
+            // 72000 ANT per month
             await this.ant.approveAndCall(this.pool.address, wei('72000'), ZERO_DATA, { from: wallet1 });
 
             await assertBalance(this.ant.balanceOf(this.pool.address), '72000');
@@ -138,11 +138,8 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             await assertBalance(this.pool.earned(wallet1), '72000');
             await assertBalance(this.pool.earned(wallet2), '0');
 
-            // Forward to week 3 and notifyReward weekly
-            for (let i = 1; i < 3; i++) {
-                await timeIncreaseTo(this.started.add(time.duration.days(30 * (i + 1))));
-                await this.ant.approveAndCall(this.pool.address, wei('72000'), ZERO_DATA, { from: wallet1 });
-            }
+            await this.ant.approveAndCall(this.pool.address, wei('72000'), ZERO_DATA, { from: wallet1 });
+            await timeIncreaseTo(this.started.add(time.duration.days(60)));
 
             await assertBalance(this.pool.rewardPerToken(), '90000');
             await assertBalance(this.pool.earned(wallet1), '90000');
