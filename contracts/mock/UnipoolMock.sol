@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "../../contracts/Unipool.sol";
+import "../Unipool.sol";
 
 
 contract UnipoolMock is Unipool {
