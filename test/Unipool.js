@@ -43,6 +43,13 @@ require('chai').use(function (chai, utils) {
 contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
     const ZERO_DATA = '0x00';
 
+    async function getAndCheckReward(ant, pool, user, amount) {
+        const initialBalance = await ant.balanceOf(user);
+        await pool.getReward({ from: user });
+        const finalBalance = await ant.balanceOf(user);
+        expect(finalBalance.sub(initialBalance)).to.be.bignumber.almostEqualDiv1e18(amount);
+    };
+
     describe('Unipool', async function () {
         beforeEach(async function () {
             this.uni = await Uni.new();
@@ -85,6 +92,9 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             expect(await this.pool.rewardPerToken()).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('36000'));
             expect(await this.pool.earned(wallet1)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('36000'));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('36000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet1, web3.utils.toWei('36000'));
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('36000'));
         });
 
         it('Two stakers with the different (1:3) stakes wait 30 days', async function () {
@@ -110,6 +120,9 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             expect(await this.pool.rewardPerToken()).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('18000'));
             expect(await this.pool.earned(wallet1)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('18000'));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('54000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet1, web3.utils.toWei('18000'));
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('54000'));
         });
 
         it('Two stakers with the different (1:3) stakes wait 60 days', async function () {
@@ -142,6 +155,9 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             expect(await this.pool.rewardPerToken()).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('90000'));
             expect(await this.pool.earned(wallet1)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('90000'));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('54000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet1, web3.utils.toWei('90000'));
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('54000'));
         });
 
         it('Three stakers with the different (1:3:5) stakes wait 90 days', async function () {
@@ -183,6 +199,9 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             expect(await this.pool.earned(wallet1)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('38000'));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('0'));
             expect(await this.pool.earned(wallet3)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('100000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet1, web3.utils.toWei('38000'));
+            await getAndCheckReward(this.ant, this.pool, wallet3, web3.utils.toWei('100000'));
         });
 
         it('One staker on 2 durations with gap', async function () {
@@ -204,6 +223,8 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
 
             expect(await this.pool.rewardPerToken()).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('144000'));
             expect(await this.pool.earned(wallet1)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('144000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet1, web3.utils.toWei('144000'));
         });
 
         it('Reward from mocked distribution to 10,000', async function () {
@@ -229,6 +250,9 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             expect(await this.pool.rewardPerToken()).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('2500'));
             expect(await this.pool.earned(wallet1)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('2500'));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('7500'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet1, web3.utils.toWei('2500'));
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('7500'));
         });
 
         // TODO: if for some period the total supply is zero, rewards for that period are lost!
@@ -250,6 +274,8 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             // day 45
             await timeIncreaseTo(this.started.add(time.duration.days(45)));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('25000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('25000'));
         });
 
         it('withdraw early solo', async function () {
@@ -274,6 +300,8 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             // day 45
             await timeIncreaseTo(this.started.add(time.duration.days(45)));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('25000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('25000'));
         });
 
         it('stake late with another one', async function () {
@@ -296,9 +324,11 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             // day 45
             await timeIncreaseTo(this.started.add(time.duration.days(45)));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('20000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('20000'));
         });
 
-        it('withdraw early', async function () {
+        it('withdraw early with another one', async function () {
             // stake 1
             await this.pool.stake(web3.utils.toWei('1'), { from: wallet1 });
             // stake 2
@@ -322,6 +352,8 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
             // day 45
             await timeIncreaseTo(this.started.add(time.duration.days(45)));
             expect(await this.pool.earned(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('20000'));
+
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('20000'));
         });
 
         it('can’t withdraw zero amount', async function () {
@@ -353,8 +385,7 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
 
             await timeIncreaseTo(this.started.add(time.duration.days(30)));
 
-            await this.pool.getReward({ from: wallet2 });
-            expect(await this.ant.balanceOf(wallet2)).to.be.bignumber.almostEqualDiv1e18(web3.utils.toWei('60000'));
+            await getAndCheckReward(this.ant, this.pool, wallet2, web3.utils.toWei('60000'));
         });
 
         it('can’t call approveAndCall with amount zero', async function () {
