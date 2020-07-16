@@ -11,7 +11,8 @@ contract LPTokenWrapper {
     using SafeERC20 for IERC20;
 
     // Uniswap v2 ANT/ETH pair token
-    IERC20 public UNI = IERC20(0xfa19de406e8F5b9100E4dD5CaD8a503a6d686Efe);
+    //IERC20 public UNI = IERC20(0xfa19de406e8F5b9100E4dD5CaD8a503a6d686Efe);
+    IERC20 public UNI = IERC20(0x5991e36ce3Eaa50950AEAA6f28cCf22E3D34986e);
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -41,7 +42,8 @@ contract LPTokenWrapper {
 contract Unipool is LPTokenWrapper, ApproveAndCallFallBack {
     uint256 public constant DURATION = 30 days;
     // Aragon Network Token
-    IERC20 public ANT = IERC20(0x960b236A07cf122663c4303350609A66A7B288C0);
+    //IERC20 public ANT = IERC20(0x960b236A07cf122663c4303350609A66A7B288C0);
+    IERC20 public ANT = IERC20(0x8cf8196c14A654dc8Aceb3cbb3dDdfd16C2b652D);
 
     uint256 public periodFinish;
     uint256 public rewardRate;
