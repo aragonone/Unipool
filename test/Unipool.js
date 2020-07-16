@@ -43,7 +43,7 @@ require('chai').use(function (chai, utils) {
 contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4]) {
     const ZERO_DATA = '0x00';
 
-    async function getAndCheckReward(ant, pool, user, amount) {
+    async function getAndCheckReward (ant, pool, user, amount) {
         const initialBalance = await ant.balanceOf(user);
         await pool.getReward({ from: user });
         const finalBalance = await ant.balanceOf(user);

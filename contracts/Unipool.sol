@@ -88,7 +88,8 @@ contract Unipool is LPTokenWrapper, ApproveAndCallFallBack {
             balanceOf(account)
                 .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
                 .div(1e18)
-                .add(rewards[account]);
+                .add(rewards[account])
+            ;
     }
 
     // stake visibility is public as overriding LPTokenWrapper's stake() function
