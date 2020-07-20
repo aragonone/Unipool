@@ -40,7 +40,7 @@ contract LPTokenWrapper {
 
 
 contract Unipool is LPTokenWrapper, ApproveAndCallFallBack {
-    uint256 public constant DURATION = 30 days;
+    uint256 public constant DURATION = 60 minutes;
     // Aragon Network Token
     //IERC20 public ANT = IERC20(0x960b236A07cf122663c4303350609A66A7B288C0);
     IERC20 public ANT = IERC20(0x8cf8196c14A654dc8Aceb3cbb3dDdfd16C2b652D);
