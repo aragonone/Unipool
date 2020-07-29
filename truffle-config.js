@@ -12,6 +12,8 @@ TruffleConfig.networks.development = {
   gasPrice: 1000000000, // web3.eth.gasPrice
 };
 
+//TruffleConfig.networks.mainnet.gasPrice = 60e9;
+
 TruffleConfig.compilers = {
   solc: {
     version: '0.5.12',
