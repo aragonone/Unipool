@@ -2,7 +2,7 @@ const { BN, expectRevert } = require('openzeppelin-test-helpers');
 const { expect } = require('chai');
 const truffleConfig = require('../truffle-config');
 
-const Bpt = artifacts.require('UniMock');
+const Bpt = artifacts.require('LptMock');
 const Ant = artifacts.require('AntMock');
 
 const Balancerpool = artifacts.require('BalancerpoolMock');
@@ -10,7 +10,7 @@ const Balancerpool = artifacts.require('BalancerpoolMock');
 const ZERO_ADDRESS = '0x' + '0'.repeat(40);
 
 contract('Balancerpool', function ([_, owner, user, other]) {
-    describe('Balancerpool', async function () {
+    describe('Recover funds', async function () {
         beforeEach(async function () {
             this.bal = await Bpt.new();
             this.bpt = await Bpt.new();
