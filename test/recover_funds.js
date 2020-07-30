@@ -4,7 +4,6 @@ const truffleConfig = require('../truffle-config');
 
 const Bpt = artifacts.require('UniMock');
 const Ant = artifacts.require('AntMock');
-const Bal = artifacts.require('UniMock');
 
 const Balancerpool = artifacts.require('BalancerpoolMock');
 

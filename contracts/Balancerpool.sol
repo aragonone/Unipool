@@ -163,6 +163,7 @@ contract Balancerpool is LPTokenWrapper, Ownable, ApproveAndCallFallBack {
         uint256 amount;
         if (address(_token) == address(0)) { // ETH
             amount = address(this).balance;
+            // solium-disable-next-line security/no-call-value
             (bool success, ) = owner.call.value(amount)("");
             require(success, "Transfer failed.");
         } else { // ERC20 tokens
