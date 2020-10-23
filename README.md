@@ -1,6 +1,7 @@
-# Unipool
+# ANT liquidity programs
 
-Staking pool for Uniswap ETH/sETH liquidity token for receiving 72000 SNX weekly reward
+Source code for the official liquidity programs run for ANT.
 
-[![Build Status](https://travis-ci.org/k06a/Unipool.svg?branch=master)](https://travis-ci.org/k06a/Unipool)
-[![Coverage Status](https://coveralls.io/repos/github/k06a/Unipool/badge.svg?branch=master)](https://coveralls.io/github/k06a/Unipool?branch=master)
+Forked and modified lightly from the original [sETH/ETH program](https://github.com/Synthetixio/Unipool) ran by Synthetix.
+
+- [2020-07](packages/jul)
