@@ -1,0 +1,32 @@
+name: ci:jul
+
+on:
+  push:
+    branches: master
+  pull_request:
+    paths:
+    - '*'
+    - 'packages/jul/**'
+
+defaults:
+  run:
+    working-directory: 'packages/jul'
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 10
+    - name: Install
+      run: yarn install --frozen-lockfile
+    - name: Lint
+      run: yarn lint
+    - name: Test
+      run: yarn test
+
+env:
+  CI: true
