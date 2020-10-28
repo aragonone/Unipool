@@ -8,4 +8,8 @@ The liquidity reward pools are lightly forked versions of Synthetix's original c
 
 You can see [the original audit for the Synthetix contract](security/unipool-audit-report.-sigp.pdf), as well as the diffs of the contract for each program ran:
 
-- [July](https://www.diffchecker.com/ggIkoPqv)
+- July
+  - [ANTv1/ETH UNI-V2 Pool](https://www.diffchecker.com/ggIkoPqv)
+- October
+  - [ANTv2/ETH UNI-V2 Pool](https://www.diffchecker.com/AD5hKQRB)
+  - [ANTv2/USDC 80:20 BPT Pool](https://www.diffchecker.com/VjzCgVff)

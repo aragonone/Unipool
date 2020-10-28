@@ -1,6 +1,7 @@
 {
-  "name": "Unipool",
+  "name": "ant-rewards-2020-07",
   "version": "0.0.1",
+  "private": true,
   "description": "",
   "repository": {
     "type": "git",
